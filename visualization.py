@@ -1,6 +1,5 @@
 import json
 import folium
-import pandas as pd
 
 def extract_lat_lon(geojson_str):
     geojson = json.loads(geojson_str)
@@ -39,9 +38,8 @@ for _, row in aggregated_df.iterrows():
     """
     popup = folium.Popup(popup_content, max_width=250)
 
-    # Check if predicted NDVI is within one standard deviation of the actual NDVI (Might remove this and use a different metric)
-    ndvi_diff = abs(row['NDVI'] - row['Predicted_NDVI'])
-    color = 'blue' if ndvi_diff <= ndvi_std else 'red'
+    # Might pick a color based on whether a condition is met or not
+    color = 'blue'
 
     # Create CircleMarker with dynamic color
     folium.CircleMarker(
