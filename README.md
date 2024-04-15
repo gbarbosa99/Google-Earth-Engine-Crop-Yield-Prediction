@@ -2,9 +2,17 @@
 Using a random forest regression model to predict annual yield for corn crops using Google Earth Engine's satellite data. 
 
 ## Table of Contents
+* [Motivation](#motivation)
 * [Data](#data)
 * [Model](#model)
 * [Results](#results)
+
+### Motivation
+Several machine learning methods are already being utilized in crop managements such as a classifier that classifies crops as harvestable or not harvestable [1] and a model for the estimation of grassland biomass [2]. The applications seem to be endless, so I wanted to throw my hat in the ring. In this project I use the [naturalized difference vegetation index](https://en.wikipedia.org/wiki/Normalized_difference_vegetation_index) to quantify a crop's health, and several features to predict the NDVI over a given time period such as soil moisture, temperature and precipitation. I used corn in this project because it seemed to be everywhere, but the crop being tested can easily be changed within the script. 
+
+This project also gave me the opportunity to extract and clean a large amount of data instead of searching for it through Kaggle. I used the Pandas library to get my data ready for the model, and Scikit Learn's Random Forest Regression model for my predictions. 
+
+Below is a lengthy explanation of my code where I explain the Google Earth Engine specific features and machine learning model I used for this project. Please enjoy! 
 
 ### Data
 All of the data used in this project was taken from the [Google Earth Engine Data Catalog](https://developers.google.com/earth-engine/datasets). I will hyperlink each library I used in this project as I mention them.
@@ -60,3 +68,47 @@ for date_obj in date_generated:
 ```
 
 ### Model
+Like I mentioned above, I used the [Random Forest Regression Model](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html) for this project. Random Forests is an [ensemble learning](https://en.wikipedia.org/wiki/Ensemble_learning) technique that fits several decision tree regressors on various sub-samples of the data and returns the average of the individual trees. I chose RFR because:
+* it handles outliers well
+* it controls overfitting through the use of all of it's decision trees
+* it provides valuable information about feature importance, allowing me to pinpoint which features have the most impact on the NDVI of the crops
+
+I iterated through each point in my aoi and trained a model based on each location's data. 
+```python
+for location_id in location_ids:
+```
+
+After splitting my data into training and test data, I imputed them to remove any null values still present in my data. I waited until after I separated the data to prevent the averages from one portion of the data affecting the other. 
+```python
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+        imputer = KNNImputer(n_neighbors=5)
+        X_train_imputed = imputer.fit_transform(X_train)
+        X_test_imputed = imputer.transform(X_test)
+```
+
+### Results
+Because there were several locations, I stored the metrics of each in a dictionary. The metrics I used were [root mean squared error](https://en.wikipedia.org/wiki/Root-mean-square_deviation), [mean squared error](https://en.wikipedia.org/wiki/Mean_squared_error), and [r^2](https://en.wikipedia.org/wiki/Coefficient_of_determination). 
+```python
+        rmse = sqrt(mean_squared_error(y_test, y_test_pred))
+        mae = mean_absolute_error(y_test, y_test_pred)
+        
+        r2_train = r2_score(y_train, y_train_pred)
+        r2_test = r2_score(y_test, y_test_pred)
+
+        metrics_dict[location_id] = {'RMSE': rmse, 'MAE': mae, 'R2_test': r2_test, 'R2_train': r2_train}
+```
+
+One red flag that stuck out to me was the coefficient of determination for the train model was very high, while the test model was a little lower. This could mean that my model was [overfitting](https://en.wikipedia.org/wiki/Overfitting) the training data. One way to solve this would be to add [regularization](https://en.wikipedia.org/wiki/Regularization_(mathematics)) to my model. Regularization introduces a penalty term to the [loss function](https://en.wikipedia.org/wiki/Loss_function) to prevent the model from overfitting to training data. 
+
+```python
+Lat: -94.38, Lon: 41.28  0.183029  0.119504  0.613310  0.934019
+Lat: -94.27, Lon: 41.18  0.121630  0.085492  0.673736  0.942292
+```
+
+When looking at feature importance, it appears the temperature plays the biggest role in the health of a crop over all locations.
+![image](https://github.com/gbarbosa99/Google-Earth-Engine-Crop-Yield-Prediction/assets/99455542/5dfbe6f8-5673-4886-b0e0-6170f94965b8)
+
+### Citations
+[1] Ramos P.J., Prieto F.A., Montoya E.C., Oliveros C.E. Automatic fruit count on coffee branches using computer vision. Comput. Electron. Agric. 2017;137:9–22. doi: 10.1016/j.compag.2017.03.010.
+[2] Kung H.-Y., Kuo T.-H., Chen C.-H., Tsai P.-Y. Accuracy Analysis Mechanism for Agriculture Data Using the Ensemble Neural Network Method. Sustainability. 2016
