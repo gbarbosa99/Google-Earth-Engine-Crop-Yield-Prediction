@@ -109,8 +109,7 @@ Because there were several locations, I stored the metrics of each in a dictiona
 
         metrics_dict[location_id] = {'RMSE': rmse, 'MAE': mae, 'R2_test': r2_test, 'R2_train': r2_train}
 ```
-
-One red flag that stuck out to me was the coefficient of determination for the train model was very high, while the test model was a little lower. This could mean that my model was [overfitting](https://en.wikipedia.org/wiki/Overfitting) the training data. One way to solve this would be to add [regularization](https://en.wikipedia.org/wiki/Regularization_(mathematics)) to my model. Regularization introduces a penalty term to the [loss function](https://en.wikipedia.org/wiki/Loss_function) to prevent the model from overfitting to training data. 
+One red flag that caught my attention was that the coefficient of determination for the training model was very high, while it was somewhat lower for the test model. This discrepancy suggests that my model might be overfitting the training data. One possible solution would be to tune the hyper-parameters of the model such as tree depth, minimum samples split, or number of trees.
 
 ```python
 Lat: -94.38, Lon: 41.28  0.183029  0.119504  0.613310  0.934019
