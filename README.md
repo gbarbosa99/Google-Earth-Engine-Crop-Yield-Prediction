@@ -80,10 +80,9 @@ for date_obj in date_generated:
 ```
 
 ### Model
-Like I mentioned above, I used the [Random Forest Regression Model](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html) for this project. Random Forests is an [ensemble learning](https://en.wikipedia.org/wiki/Ensemble_learning) technique that fits several decision tree regressors on various sub-samples of the data and returns the average of the individual trees. I chose RFR because:
-* it handles outliers well
-* it controls overfitting through the use of all of it's decision trees
-* it provides valuable information about feature importance, allowing me to pinpoint which features have the most impact on the NDVI of the crops
+Although I sought an accurate prediction of NDVI, I was also interested in understanding the model's inference - that is, learning about the features and their roles in the prediction process. To acquire this information, I needed a highly interpretable model. A more complex model might have yielded better predictions, but it would have obscured the importance of individual features. Conversely, a simpler model would have offered greater clarity about the features, but might have compromised accuracy by failing to capture the data's intricacies as effectively as a more flexible model could. 
+
+This is where the [ensemble learning](https://en.wikipedia.org/wiki/Ensemble_learning) [random forest regression](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html) model fit perfectly. It is flexible, controls over-fitting through the use of many trees, and provides valuable information about feature importance.
 
 I iterated through each point in my aoi and trained a model based on each location's data. 
 ```python
