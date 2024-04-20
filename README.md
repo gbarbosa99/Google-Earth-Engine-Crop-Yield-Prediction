@@ -16,20 +16,21 @@ This project also gave me the opportunity to extract and clean a large amount of
 Below is as explanation of the Google Earth Engine specific features and machine learning model I used for this project. Please enjoy! 
 
 ### Metrics
-Before I get into the script, I'd like to give a brief explanation of the metrics I chose. The target metric in this project is NDVI or Normalized Difference Vegetation Index. This is a widely used metric for quantifying the health and density of vegetation using sensor data. It measures the difference in the levels of red (which healthy plants absorb) and near-infrared (which healthy plants reflect) light. 
+The primary metric in this project is the Normalized Difference Vegetation Index (NDVI), a widely used index for assessing vegetation health and density via sensor data. NDVI measures the differential levels of red (absorbed by healthy plants) and near-infrared (reflected by healthy plants) light. Typically, higher NDVI values indicate healthier vegetation, which correlates with enhanced photosynthesis capabilities. This index is invaluable for farmers and agronomists to forecast crop yields, aiding in effective planning and marketing of produce.
 
-Higher NDVI values typically indicate healthier plants with more chlorophyll and a better capacity for photosynthesis. By analyzing NDVI data over time, farmers and agronomists can predict the yield of their crops. This helps in planning and marketing the produce more effectively.
+#### Key Features of the Model
+* **soil moisture:** Adequate soil moisture is necessary for the absorption of nutrients and proper physiological functions of plants. Decreased soil moisture can lead to reduced plant height, leaf number, and total leaf area[3].
+* **Temperature:** A critical factor in crop development and function, altering enzyme functions within a leaf and triggering changes in developmental growth stages linked to crop yield[4].
+* **Precipitation:** Essential for maintaining plant health, with variations affecting stress levels and NDVI[5].
 
-The first feature I chose was soil moisture, which is crucial for plant growth. Adequate soil moisture is necessary for the absorption of nutrients and proper physiological functions of plants. Decreased soil moisture can lead to reduced plant height, leaf number, and total leaf area[3]. 
+I also considered land coverage or vegetation type in the analysis, which might affect NDVI readings differently across crop types. This presents an interesting avenue for future experiments to compare results across different crops.
 
-The second feature I chose was surface temperature. Temperature is a critical determinant of crop development and function, altering enzyme functions within a leaf and triggering changes in developmental growth stages that are tightly coupled with crop yield[4]. 
+Other potential features not included here are sunlight exposure, soil pH, and humidity.
 
-The third and final feature I chose was precipitation. Water availability from rainfall is essential for plant health. Prolonged periods of drought or excessive rainfall can cause stress to plants, altering their NDVI[5].
-
-### Data
+### Data Aqcuisition
 All of the data used in this project was taken from the [Google Earth Engine Data Catalog](https://developers.google.com/earth-engine/datasets). I will hyperlink each library I used in this project as I mention them.
 
-The first step in this project was to select an area of interest. I used the [geometry.polygon](https://developers.google.com/earth-engine/apidocs/ee-geometry-polygon) method because it fits well into how I planned to extract data from the Earth Engine libraries, which I explain below. I selected a location with several corn fields, but the aoi can easily be changed to someplace else by changing the coordinates.
+The initial step involved selecting an area of interest (AOI). I used the [geometry.polygon](https://developers.google.com/earth-engine/apidocs/ee-geometry-polygon) method because it fits well into how I planned to extract data from the Earth Engine libraries, which I explain below.
 ```python
 aoi = ee.Geometry.Polygon([
     [-94.70937177214154, 41.15239644721922],
@@ -40,13 +41,13 @@ aoi = ee.Geometry.Polygon([
 ])
 ```
 
-With my area of interest defined, the next step was to classify the crop fields within the aoi. Luckily there is a library that classifies all crops in the United States by assigning a class to it named [USDA/NASS/CDL](https://developers.google.com/earth-engine/datasets/catalog/USDA_NASS_CDL). In the snippet below I selected all croplands in my aoi with class = 1 (corn). This can also easily be changed to select any crop in the classlist. 
+Using the USDA/NASS/CDL library, I classified crop fields within this AOI and selected corn crops specifically. To gather randomized data points across these fields, I used:
 ```python
 cdl = ee.Image(f'USDA/NASS/CDL/{year}').select('cropland').clip(aoi)
 corn_mask = cdl.eq(1)
 ```
 
-To randomly select crops I first created 100 random points in the aoi. The points were assigned a new feature, 'corn' with a value of 1 if over a corn field or 0 if otherwise. I then filtered the points to only ones with corn set to 1 and limited the count to a max of 5 points. 
+To randomly select crops I first created 100 random points in the aoi. The points were assigned a new feature, 'corn' with a value of 1 if over a corn field or 0 if otherwise. I then filtered the points to only ones with corn set to 1 and limited the count to a max of 5 points.
 ```python
 random_points = ee.FeatureCollection.randomPoints(region=aoi, points=100, seed=42)
 
