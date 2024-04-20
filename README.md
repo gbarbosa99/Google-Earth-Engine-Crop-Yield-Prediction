@@ -3,16 +3,28 @@ Using a random forest regression model to predict annual yield for corn crops us
 
 ## Table of Contents
 * [Motivation](#motivation)
+* [Metrics](#metrics)
 * [Data](#data)
 * [Model](#model)
 * [Results](#results)
 
 ### Motivation
-Several machine learning methods are already being utilized in crop managements such as a classifier that classifies crops as harvestable or not harvestable [1] and a model for the estimation of grassland biomass [2]. The applications seem to be endless, so I wanted to throw my hat in the ring. In this project I use the [naturalized difference vegetation index](https://en.wikipedia.org/wiki/Normalized_difference_vegetation_index) to quantify a crop's health, and several features to predict the NDVI over a given time period such as soil moisture, temperature and precipitation. I used corn in this project because it seemed to be everywhere, but the crop being tested can easily be changed within the script. 
+Several machine learning methods are already being utilized in crop managements such as a classifier that classifies crops as harvestable or not harvestable [1] and a model for the estimation of grassland biomass [2]. The applications seem to be endless. In this project I use the [naturalized difference vegetation index](https://en.wikipedia.org/wiki/Normalized_difference_vegetation_index) to quantify a crop's health, and several features to predict the NDVI over a given time period such as soil moisture, temperature and precipitation. I used corn in this project because of how much there is, but the crop being tested can easily be changed within the script. 
 
 This project also gave me the opportunity to extract and clean a large amount of data instead of searching for it through Kaggle. I used the Pandas library to get my data ready for the model, and Scikit Learn's Random Forest Regression model for my predictions. 
 
-Below is a lengthy explanation of my code where I explain the Google Earth Engine specific features and machine learning model I used for this project. Please enjoy! 
+Below is as explanation of the Google Earth Engine specific features and machine learning model I used for this project. Please enjoy! 
+
+### Metrics
+Before I get into the script, I'd like to give a brief explanation of the metrics I chose. The target metric in this project is NDVI or Normalized Difference Vegetation Index. This is a widely used metric for quantifying the health and density of vegetation using sensor data. It measures the difference in the levels of red (which healthy plants absorb) and near-infrared (which healthy plants reflect) light. 
+
+Higher NDVI values typically indicate healthier plants with more chlorophyll and a better capacity for photosynthesis. By analyzing NDVI data over time, farmers and agronomists can predict the yield of their crops. This helps in planning and marketing the produce more effectively.
+
+The first feature I chose was soil moisture, which is crucial for plant growth. Adequate soil moisture is necessary for the absorption of nutrients and proper physiological functions of plants. Decreased soil moisture can lead to reduced plant height, leaf number, and total leaf area[3]. 
+
+The second feature I chose was surface temperature. Temperature is a critical determinant of crop development and function, altering enzyme functions within a leaf and triggering changes in developmental growth stages that are tightly coupled with crop yield[4]. 
+
+The third and final feature I chose was precipitation. Water availability from rainfall is essential for plant health. Prolonged periods of drought or excessive rainfall can cause stress to plants, altering their NDVI[5].
 
 ### Data
 All of the data used in this project was taken from the [Google Earth Engine Data Catalog](https://developers.google.com/earth-engine/datasets). I will hyperlink each library I used in this project as I mention them.
@@ -55,7 +67,7 @@ Instead of showing how I extracted all of the features for these points, I'll on
         .mean().rename('soil moisture')
 ```
 
-I wrapped the extraction of each feature into a function and iterated through each day of a given date range. Finally, I took all of this data and stored it into a big dataframe with daily values for each point. 
+I wrapped the extraction of each feature into a function and iterated through each day in a date range. Finally, I took all of this data and stored it into a big dataframe with daily values for each point. 
 ```python
 def extract_daily_values(date_str):
     date = ee.Date(date_str)
@@ -88,7 +100,7 @@ After splitting my data into training and test data, I imputed them to remove an
 ```
 
 ### Results
-Because there were several locations, I stored the metrics of each in a dictionary. The metrics I used were [root mean squared error](https://en.wikipedia.org/wiki/Root-mean-square_deviation), [mean squared error](https://en.wikipedia.org/wiki/Mean_squared_error), and [r^2](https://en.wikipedia.org/wiki/Coefficient_of_determination). 
+Because there were several locations, I stored the metrics of each in a dictionary. The metrics I chose are [root mean squared error](https://en.wikipedia.org/wiki/Root-mean-square_deviation), [mean squared error](https://en.wikipedia.org/wiki/Mean_squared_error), and [r^2](https://en.wikipedia.org/wiki/Coefficient_of_determination). 
 ```python
         rmse = sqrt(mean_squared_error(y_test, y_test_pred))
         mae = mean_absolute_error(y_test, y_test_pred)
@@ -112,3 +124,6 @@ When looking at feature importance, it appears the temperature plays the biggest
 ### Citations
 [1] Ramos P.J., Prieto F.A., Montoya E.C., Oliveros C.E. Automatic fruit count on coffee branches using computer vision. Comput. Electron. Agric. 2017;137:9–22. doi: 10.1016/j.compag.2017.03.010.
 [2] Kung H.-Y., Kuo T.-H., Chen C.-H., Tsai P.-Y. Accuracy Analysis Mechanism for Agriculture Data Using the Ensemble Neural Network Method. Sustainability. 2016
+[3] Vennam RR, Ramamoorthy P, Poudel S, Reddy KR, Henry WB, Bheemanahalli R. Developing Functional Relationships between Soil Moisture Content and Corn Early-Season Physiology, Growth, and Development. Plants (Basel). 2023 Jun 28;12(13):2471. doi: 10.3390/plants12132471. PMID: 37447032; PMCID: PMC10346487.
+[4] Moore CE, Meacham-Hensold K, Lemonnier P, Slattery RA, Benjamin C, Bernacchi CJ, Lawson T, Cavanagh AP. The effect of increasing temperature on crop photosynthesis: from enzymes to ecosystems. J Exp Bot. 2021 Apr 2;72(8):2822-2844. doi: 10.1093/jxb/erab090. PMID: 33619527; PMCID: PMC8023210.
+[5] https://health2016.globalchange.gov/low/ClimateHealth2016_07_Food_small.pdf
