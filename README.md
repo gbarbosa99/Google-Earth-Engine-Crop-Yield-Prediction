@@ -112,6 +112,7 @@ Because there were several locations, I stored the metrics of each in a dictiona
 One red flag that caught my attention was that the coefficient of determination for the training model was very high, while it was somewhat lower for the test model. This discrepancy suggests that my model might be overfitting the training data. One possible solution would be to tune the hyper-parameters of the model such as tree depth, minimum samples split, or number of trees.
 
 ```python
+Location_ID              RMSE      MAE       R2_test   R2_train
 Lat: -94.38, Lon: 41.28  0.183029  0.119504  0.613310  0.934019
 Lat: -94.27, Lon: 41.18  0.121630  0.085492  0.673736  0.942292
 ```
